@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from scipy.signal import convolve2d
 from torch.nn import functional as F
 from scipy.ndimage import measurements, interpolation
+import gdal
+from osgeo import gdal, ogr
 
 from ZSSRforKernelGAN.ZSSR import ZSSR
 
@@ -44,9 +46,14 @@ def resize_tensor_w_kernel(im_t, k, sf=None):
 
 
 def read_image(path):
-    """Loads an image"""
-    im = Image.open(path).convert('RGB')
-    im = np.array(im, dtype=np.uint8)
+    """Loads an image and returns one 3d array of height x width x channels"""
+    #im = Image.open(path).convert('RGB')
+    #im = np.array(im, dtype=np.uint8) 
+    im = gdal.Open(path, gdal.GA_ReadOnly)
+    im_B2 = im.GetRasterBand(1).ReadAsArray()
+    im_B3 = im.GetRasterBand(2).ReadAsArray()
+    im_B4 = im.GetRasterBand(3).ReadAsArray()
+    im = np.dstack([im_B2, im_B3, im_B4])
     return im
 
 
