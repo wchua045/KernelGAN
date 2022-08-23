@@ -46,13 +46,13 @@ def resize_tensor_w_kernel(im_t, k, sf=None):
 
 
 def read_image(path):
-    """Loads an image and returns one 3d array of height x width x channels"""
+    """Loads an image and returns one 3d array of height x width x channels, and convert all NaN values to 0"""
     #im = Image.open(path).convert('RGB')
     #im = np.array(im, dtype=np.uint8) 
     im = gdal.Open(path, gdal.GA_ReadOnly)
-    im_B2 = im.GetRasterBand(1).ReadAsArray()
-    im_B3 = im.GetRasterBand(2).ReadAsArray()
-    im_B4 = im.GetRasterBand(3).ReadAsArray()
+    im_B2 = np.nan_to_num(im.GetRasterBand(1).ReadAsArray())
+    im_B3 = np.nan_to_num(im.GetRasterBand(2).ReadAsArray())
+    im_B4 = np.nan_to_num(im.GetRasterBand(3).ReadAsArray())
     im = np.dstack([im_B2, im_B3, im_B4])
     return im
 

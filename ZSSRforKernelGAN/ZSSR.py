@@ -3,6 +3,8 @@ from ZSSRforKernelGAN.zssr_configs import Config
 from ZSSRforKernelGAN.zssr_utils import *
 import numpy as np
 import tensorflow as tf
+import gdal
+from osgeo import gdal, ogr
 
 
 class ZSSR:
@@ -69,10 +71,19 @@ class ZSSR:
         # Acquire meta parameters configuration from configuration class as a class variable
         self.conf = Config(scale_factor, is_real_img, noise_scale)
         # Read input image
-        self.input = img.imread(input_img_path)
+        #self.input = img.imread(input_img_path)
+        im = gdal.Open(input_img_path, gdal.GA_ReadOnly)
+        im_B2 = im.GetRasterBand(1).ReadAsArray()
+        im_B3 = im.GetRasterBand(2).ReadAsArray()
+        im_B4 = im.GetRasterBand(3).ReadAsArray()
+        self.input = np.dstack([im_B2, im_B3, im_B4])
         # Discard the alpha channel from images
         if self.input.shape[-1] == 4:
-            self.input = img.imread(input_img_path)[:, :, :3]
+            im = gdal.Open(input_img_path, gdal.GA_ReadOnly)
+            im_B2 = im.GetRasterBand(1).ReadAsArray()
+            im_B3 = im.GetRasterBand(2).ReadAsArray()
+            im_B4 = im.GetRasterBand(3).ReadAsArray()
+            self.input = np.dstack([im_B2, im_B3, im_B4])
         # For gray-scale images - add a 3rd dimension to fit the network
         elif len(self.input.shape) == 2:
             self.input = np.expand_dims(self.input, -1)
